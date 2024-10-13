@@ -58,5 +58,5 @@ RUN mvn clean package -DskipTests
 FROM openjdk:11-jre-slim
 COPY --from=build /app/target/my-java-app-1.0-SNAPSHOT.jar /app.jar  # Updated the JAR file name
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/my-java-app-1.0-SNAPSHOT.jar"]
 
