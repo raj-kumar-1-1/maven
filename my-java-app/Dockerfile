@@ -1,18 +1,24 @@
-# Use a base image that has Java installed
-FROM openjdk:11-jre-slim
+# Use the official Maven image to build the application
+FROM maven:3.8.1-openjdk-11 AS build
 
-# Set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the pom.xml and download dependencies
+# Copy the pom.xml and the source code
 COPY pom.xml .
-RUN mvn dependency:go-offline
+COPY src ./src
 
-# Copy the entire project
-COPY . .
+# Package the application
+RUN mvn clean package -DskipTests
 
-# Package the application (this will create the jar file)
-RUN mvn package
+# Use a smaller image to run the application
+FROM openjdk:11-jre-slim
 
-# Command to run the application
-CMD ["java", "-jar", "target/my-java-app-1.0-SNAPSHOT.jar"]
+# Copy the jar file from the build stage
+COPY --from=build /app/target/my-java-app-0.0.1-SNAPSHOT.jar /app.jar
+
+# Expose the port that the app runs on
+EXPOSE 8080
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "/app.jar"]
